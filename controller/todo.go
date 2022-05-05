@@ -59,7 +59,3 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
-
-func Complete(w http.ResponseWriter, r *http.Request) {
-
-}
