@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/rampl1ng/go-todoList/config"
 )
 
@@ -54,6 +55,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 func Add(w http.ResponseWriter, r *http.Request) {
 	item := r.FormValue("item")
 	_, err := db.Exec(`INSERT INTO todos (item) VALUE (?)`, item)
+	if err != nil {
+		fmt.Println(err)
+	}
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+// todo: undo complete
+func Complete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	_, err := db.Exec(`UPDATE todos SET completed = 1 WHERE id = ?`, id)
 	if err != nil {
 		fmt.Println(err)
 	}
