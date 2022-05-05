@@ -42,11 +42,11 @@
                     {{range .Todos}}
                         {{if .Completed}}
                             <tr>
-                                <td><strike>{{.Item}}</strike></td>
+                                <td><del>{{.Item}}</del></td>
                                 <td>Completed</td>
                                 <td>
-                                    <button class="btn btn-primary" disabled>Complete</button>
-                                    <button class="btn btn-danger" disabled>Delete</button>
+                                    <button class="btn btn-primary" disabled>Done</button>
+                                    <a href="/delete/{{ .Id}}"><button class="btn btn-danger" >Delete</button></a>
                                 </td>
                             </tr>
                         {{else}}
@@ -54,7 +54,7 @@
                                 <td>{{.Item}}</td>
                                 <td>Not Completed</td>
                                 <td>
-                                    <a href="/complete/{{ .Id}}"><button class="btn btn-primary">Complete</button></a>
+                                    <a href="/complete/{{ .Id}}"><button class="btn btn-primary">Done</button></a>
                                     <a href="/delete/{{ .Id}}"><button class="btn btn-danger">Delete</button></a>
                                 </td>
                             </tr>

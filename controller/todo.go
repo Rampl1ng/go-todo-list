@@ -10,11 +10,11 @@ import (
 )
 
 var (
-	id        int
-	item      string
-	completed bool
-	view      = template.Must(template.ParseFiles("./views/index.html"))
-	db        = config.Database()
+	// id        int
+	// item      string
+	// completed bool
+	view = template.Must(template.ParseFiles("./views/index.html"))
+	db   = config.Database()
 )
 
 type View struct {
@@ -28,21 +28,18 @@ type Todo struct {
 }
 
 func Show(w http.ResponseWriter, r *http.Request) {
-	todos := make([]Todo, 8)
+	todos := make([]Todo, 0)
 
 	rows, err := db.Query(`SELECT * FROM todos`)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for rows.Next() {
-		err = rows.Scan(&id, &item, &completed)
+		var todo Todo
+
+		err = rows.Scan(&todo.Id, &todo.Item, &todo.Completed)
 		if err != nil {
 			fmt.Println(err)
-		}
-		todo := Todo{
-			Id:        id,
-			Item:      item,
-			Completed: completed,
 		}
 		todos = append(todos, todo)
 	}
@@ -50,8 +47,10 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Todos: todos,
 	}
 	_ = view.Execute(w, data)
+
 }
 
+// todo: if repeat item, add fails
 func Add(w http.ResponseWriter, r *http.Request) {
 	item := r.FormValue("item")
 	_, err := db.Exec(`INSERT INTO todos (item) VALUE (?)`, item)
@@ -61,7 +60,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
 
-// todo: undo complete
+// Complete changes the todo status to Completed
 func Complete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
