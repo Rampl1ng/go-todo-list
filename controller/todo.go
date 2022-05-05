@@ -71,3 +71,13 @@ func Complete(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
 }
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	_, err := db.Exec(`DELETE FROM todos WHERE id = ?`, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
