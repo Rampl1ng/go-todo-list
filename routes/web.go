@@ -9,5 +9,6 @@ func Init() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", controller.Show)
+	r.HandleFunc("/add", controller.Add).Methods("POST")
 	return r
 }

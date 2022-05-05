@@ -34,7 +34,7 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	for rows.Next() {
-		err = rows.Scan(&id, item, completed)
+		err = rows.Scan(&id, &item, &completed)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -49,4 +49,17 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Todos: todos,
 	}
 	_ = view.Execute(w, data)
+}
+
+func Add(w http.ResponseWriter, r *http.Request) {
+	item := r.FormValue("item")
+	_, err := db.Exec(`INSERT INTO todos (item) VALUE (?)`, item)
+	if err != nil {
+		fmt.Println(err)
+	}
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+func Complete(w http.ResponseWriter, r *http.Request) {
+
 }
