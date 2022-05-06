@@ -19,5 +19,6 @@ func Init() *mux.Router {
 	r2 := r.PathPrefix("/v2").Subrouter()
 	r2.HandleFunc("/", controller.GetAll)
 	r2.HandleFunc("/create", controller.Create).Methods("POST")
+	r2.HandleFunc("/delete/{id}", controller.Remove)
 	return r
 }

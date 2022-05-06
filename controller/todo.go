@@ -130,6 +130,8 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	data := MongoDBView{
 		Todos: todos,
 	}
+	fmt.Printf("%#v\n", data)
+
 	_ = viewV2.Execute(w, data)
 }
 
@@ -138,7 +140,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	item := r.FormValue("item")
 	todo = MongoDBTodo{
-		Id:        primitive.NewObjectID(),
 		Item:      item,
 		Completed: false,
 	}
@@ -148,6 +149,29 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	fmt.Println(res.InsertedID)
+
+	http.Redirect(w, r, "/v2/", http.StatusMovedPermanently)
+}
+
+func Remove(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id := vars["id"] // ObjectID("62752727979a6f62a19514bf") is a string
+	id = id[10:34]   // 62752727979a6f62a19514bf
+
+	ctx, cancel := utils.TodoContext()
+	defer cancel()
+
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	_, err = mongoCollection.DeleteOne(ctx, bson.M{"_id": objId})
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	http.Redirect(w, r, "/v2/", http.StatusMovedPermanently)
 }
