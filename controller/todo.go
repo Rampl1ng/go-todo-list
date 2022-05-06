@@ -163,7 +163,6 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	objId, err := primitive.ObjectIDFromHex(id)
-
 	if err != nil {
 		fmt.Println(err)
 	}
