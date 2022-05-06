@@ -1,20 +1,27 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/rampl1ng/go-todoList/config"
+	"github.com/rampl1ng/go-todoList/utils"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"gopkg.in/mgo.v2/bson"
 )
 
 var (
 	// id        int
 	// item      string
 	// completed bool
-	view = template.Must(template.ParseFiles("./views/index.html"))
-	db   = config.Database()
+	view            = template.Must(template.ParseFiles("./views/index.html"))
+	db              = config.Database()
+	mongoDb         = config.MongoClient()
+	mongoCollection = config.GetCollection()
 )
 
 type View struct {
@@ -47,10 +54,9 @@ func Show(w http.ResponseWriter, r *http.Request) {
 		Todos: todos,
 	}
 	_ = view.Execute(w, data)
-
 }
 
-// todo: if repeat item, add fails
+// TODO: if repeat item, add fails
 func Add(w http.ResponseWriter, r *http.Request) {
 	item := r.FormValue("item")
 	_, err := db.Exec(`INSERT INTO todos (item) VALUE (?)`, item)
@@ -79,4 +85,42 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}
+
+/**
+  ------------------
+ |                  |
+ |  v2 Use MongoDB  |
+ |                  |
+  ------------------
+**/
+func GetAll(w http.ResponseWriter, r *http.Request) {
+	var todos []Todo
+
+	ctx, cancel := utils.TodoContext()
+	defer cancel()
+
+	filter := bson.M{}
+	findOptions := options.Find()
+	cursor, err := mongoCollection.Find(ctx, filter, findOptions)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for cursor.Next(ctx) {
+		var todo Todo
+		cursor.Decode(&todo)
+		todos = append(todos, todo)
+	}
+
+	data := View{
+		Todos: todos,
+	}
+	_ = view.Execute(w, data)
+}
+
+// TODO: test conncetion?
+func chooseDB() {
+	if err := mongoDb.Ping(context.TODO(), readpref.Primary()); err != nil {
+		fmt.Println(err)
+	}
 }

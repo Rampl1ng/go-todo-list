@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,12 +10,18 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/ichtrojan/thoth"
-	_ "github.com/joho/godotenv/autoload" // t help you to load .env automatically
+	_ "github.com/joho/godotenv/autoload" // this help you to load .env automatically
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Database() *sql.DB {
-	logger, _ := thoth.Init("log")
+var (
+	logger, _     = thoth.Init("log")
+	jsonLogger, _ = thoth.Init("json")
+)
 
+// MySQL
+func Database() *sql.DB {
 	user, exist := os.LookupEnv("DB_USER")
 	if !exist {
 		logger.Log(errors.New("DB_USER not set in .env"))
@@ -36,9 +43,8 @@ func Database() *sql.DB {
 	if err != nil {
 		logger.Log(err)
 		log.Fatal(err)
-	} else {
-		fmt.Println("Database Connection Successful")
 	}
+	fmt.Println("Database Connection Successful")
 
 	_, err = db.Exec(`CREATE DATABASE gotodo`)
 	if err != nil {
@@ -50,7 +56,7 @@ func Database() *sql.DB {
 		fmt.Println(err)
 	}
 
-	db.Exec(`
+	_, err = db.Exec(`
 		CREATE TABLE todos (
 			id INT AUTO_INCREMENT,
 			item TEXT NOT NULL,
@@ -63,4 +69,40 @@ func Database() *sql.DB {
 	}
 
 	return db
+}
+
+// MongoDB use json logging format
+func MongoClient() (client *mongo.Client) {
+
+	uri, exist := os.LookupEnv("MONGO_URI")
+	if !exist {
+		jsonLogger.Log(errors.New("MONGO_URI not set in .env"))
+		log.Fatal("MONGO_URI not set in .env")
+	}
+
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		jsonLogger.Log(err)
+		log.Fatal(err)
+	}
+	fmt.Println("MongoDB Connection Successful")
+
+	return client
+}
+
+func GetCollection() *mongo.Collection {
+	client := MongoClient()
+
+	db, exist := os.LookupEnv("MONGO_DB")
+	if !exist {
+		jsonLogger.Log(errors.New("MONGO_DB not set in .env"))
+		log.Fatal("MONGO_DB not set in .env")
+	}
+	collection, exist := os.LookupEnv("MONGO_COLLECTION")
+	if !exist {
+		jsonLogger.Log(errors.New("MONGO_COLLECTION not set in .env"))
+		log.Fatal("MONGO_COLLECTION not set in .env")
+	}
+
+	return client.Database(db).Collection(collection)
 }
