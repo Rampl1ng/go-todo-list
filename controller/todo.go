@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rampl1ng/go-todoList/config"
 	"github.com/rampl1ng/go-todoList/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/mgo.v2/bson"
@@ -19,15 +20,18 @@ var (
 	// item      string
 	// completed bool
 	view            = template.Must(template.ParseFiles("./views/index.html"))
+	viewV2          = template.Must(template.ParseFiles("./views/indexv2.html"))
 	db              = config.Database()
 	mongoDb         = config.MongoClient()
 	mongoCollection = config.GetCollection()
 )
 
+// Mysql todo view
 type View struct {
 	Todos []Todo
 }
 
+// Mysql todo
 type Todo struct {
 	Id        int
 	Item      string
@@ -63,7 +67,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/v1/", http.StatusMovedPermanently)
 }
 
 // Complete changes the todo status to Completed
@@ -74,7 +78,7 @@ func Complete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/v1/", http.StatusMovedPermanently)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +88,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	http.Redirect(w, r, "/v1/", http.StatusMovedPermanently)
 }
 
 /**
@@ -94,8 +98,19 @@ func Delete(w http.ResponseWriter, r *http.Request) {
  |                  |
   ------------------
 **/
+
+type MongoDBView struct {
+	Todos []MongoDBTodo
+}
+
+type MongoDBTodo struct {
+	Id        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Item      string             `bson:"title,omitempty" json:"title,omitempty"`
+	Completed bool               `bson:"complete" json:"complete"`
+}
+
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	var todos []Todo
+	var todos []MongoDBTodo
 
 	ctx, cancel := utils.TodoContext()
 	defer cancel()
@@ -107,15 +122,34 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	for cursor.Next(ctx) {
-		var todo Todo
+		var todo MongoDBTodo
 		cursor.Decode(&todo)
 		todos = append(todos, todo)
 	}
 
-	data := View{
+	data := MongoDBView{
 		Todos: todos,
 	}
-	_ = view.Execute(w, data)
+	_ = viewV2.Execute(w, data)
+}
+
+func Create(w http.ResponseWriter, r *http.Request) {
+	var todo MongoDBTodo
+
+	item := r.FormValue("item")
+	todo = MongoDBTodo{
+		Id:        primitive.NewObjectID(),
+		Item:      item,
+		Completed: false,
+	}
+
+	res, err := mongoCollection.InsertOne(context.TODO(), todo)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res.InsertedID)
+
+	http.Redirect(w, r, "/v2/", http.StatusMovedPermanently)
 }
 
 // TODO: test conncetion?

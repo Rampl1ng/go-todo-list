@@ -13,7 +13,7 @@
         <div class="card">
             <div class="card-header">Add a task</div>
             <div class="card-body">
-                <form action="/v1/add" method="post">
+                <form action="/v2/create" method="post">
                     <div class="form-group">
                         <label for="Item">Item</label>
                         <input type="text" class="form-control" name="item" placeholder="What do you want to do?">
@@ -46,7 +46,7 @@
                                 <td>Completed</td>
                                 <td>
                                     <button class="btn btn-primary" disabled>Done</button>
-                                    <a href="/v1/delete/{{ .Id}}"><button class="btn btn-danger" >Delete</button></a>
+                                    <a href="/v2/delete/{{ .Id}}"><button class="btn btn-danger" >Delete</button></a>
                                 </td>
                             </tr>
                         {{else}}
@@ -54,8 +54,8 @@
                                 <td>{{.Item}}</td>
                                 <td>Not Completed</td>
                                 <td>
-                                    <a href="/v1/complete/{{ .Id}}"><button class="btn btn-primary">Done</button></a>
-                                    <a href="/v1/delete/{{ .Id}}"><button class="btn btn-danger">Delete</button></a>
+                                    <a href="/v2/complete/{{ .Id}}"><button class="btn btn-primary">Done</button></a>
+                                    <a href="/v2/delete/{{ .Id}}"><button class="btn btn-danger">Delete</button></a>
                                 </td>
                             </tr>
                         {{end}}

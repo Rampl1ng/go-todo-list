@@ -72,6 +72,7 @@ func Database() *sql.DB {
 }
 
 // MongoDB use json logging format
+// TODO: whether be private?
 func MongoClient() (client *mongo.Client) {
 
 	uri, exist := os.LookupEnv("MONGO_URI")

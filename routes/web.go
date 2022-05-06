@@ -18,5 +18,6 @@ func Init() *mux.Router {
 	// todo-list/v2 use mongodb
 	r2 := r.PathPrefix("/v2").Subrouter()
 	r2.HandleFunc("/", controller.GetAll)
+	r2.HandleFunc("/create", controller.Create).Methods("POST")
 	return r
 }
