@@ -11,7 +11,6 @@ import (
 	"github.com/rampl1ng/go-todoList/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -22,7 +21,6 @@ var (
 	view            = template.Must(template.ParseFiles("./views/index.html"))
 	viewV2          = template.Must(template.ParseFiles("./views/indexv2.html"))
 	db              = config.Database()
-	mongoDb         = config.MongoClient()
 	mongoCollection = config.GetCollection()
 )
 
@@ -155,17 +153,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 func Remove(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-
-	id := vars["id"] // ObjectID("62752727979a6f62a19514bf") is a string
-	id = id[10:34]   // 62752727979a6f62a19514bf
-
-	ctx, cancel := utils.TodoContext()
-	defer cancel()
-
-	objId, err := primitive.ObjectIDFromHex(id)
+	id := vars["id"]
+	objId, err := convertObjectID(id)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	ctx, cancel := utils.TodoContext()
+	defer cancel()
 
 	_, err = mongoCollection.DeleteOne(ctx, bson.M{"_id": objId})
 	if err != nil {
@@ -175,9 +170,35 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/v2/", http.StatusMovedPermanently)
 }
 
-// TODO: test conncetion?
-func chooseDB() {
-	if err := mongoDb.Ping(context.TODO(), readpref.Primary()); err != nil {
+// Update changes the todo status to Completed
+func Update(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	objId, err := convertObjectID(id)
+	if err != nil {
 		fmt.Println(err)
 	}
+
+	ctx, cancel := utils.TodoContext()
+	defer cancel()
+
+	// change complete status false to true
+	update := bson.M{
+		"$set": bson.M{"complete": true},
+	}
+	fmt.Println(update)
+
+	_, err = mongoCollection.UpdateOne(ctx, bson.M{"_id": objId}, update)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	http.Redirect(w, r, "/v2/", http.StatusMovedPermanently)
+}
+
+// convert id in url to ObjectID
+// e.g.
+// 62752727979a6f62a19514bf -> ObjectID("62752727979a6f62a19514bf")
+func convertObjectID(id string) (primitive.ObjectID, error) {
+	return primitive.ObjectIDFromHex(id[10:34])
 }
