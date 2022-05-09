@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rampl1ng/go-todoList/config"
 	"github.com/rampl1ng/go-todoList/utils"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var (
@@ -128,7 +128,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	data := MongoDBView{
 		Todos: todos,
 	}
-	fmt.Printf("%#v\n", data)
+	// fmt.Printf("%#v\n", data)
 
 	_ = viewV2.Execute(w, data)
 }
