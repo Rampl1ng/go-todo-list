@@ -1,4 +1,4 @@
-# gotodoList
+# go-todo-list
 
 ## Introduction
 
