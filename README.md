@@ -20,7 +20,7 @@ git clone https://github.com/Rampl1ng/go-todoList.git
 * Change Directory
 
 ``` bash
-cd go-todo-List
+cd go-todo-list
 ```
 
 - Initiate `.env` file
