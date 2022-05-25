@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
 	"github.com/rampl1ng/go-todoList/config"
 	"github.com/rampl1ng/go-todoList/utils"
@@ -107,7 +108,7 @@ type MongoDBTodo struct {
 	Completed bool               `bson:"complete" json:"complete"`
 }
 
-func GetAll(w http.ResponseWriter, r *http.Request) {
+func GetAll(c *gin.Context) {
 	var todos []MongoDBTodo
 
 	ctx, cancel := utils.TodoContext()
@@ -130,7 +131,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	// fmt.Printf("%#v\n", data)
 
-	_ = viewV2.Execute(w, data)
+	_ = viewV2.Execute(c.Writer, data)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
