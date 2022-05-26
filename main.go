@@ -3,16 +3,14 @@ package main
 import (
 	"errors"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/ichtrojan/thoth"
 	"github.com/joho/godotenv"
 	"github.com/rampl1ng/go-todoList/routes"
+	"github.com/rampl1ng/go-todoList/utils"
 )
 
 func main() {
-	logger, _ := thoth.Init("log")
+	logger, _ := utils.Init("log")
 
 	if err := godotenv.Load(); err != nil {
 		logger.Log(errors.New("no .env file found"))
@@ -20,13 +18,9 @@ func main() {
 	}
 	log.Println(".env file load successfully")
 
-	port, exist := os.LookupEnv("PORT")
-	if !exist {
-		logger.Log(errors.New("PORT not set in .env"))
-		log.Fatal("PORT not set in .env")
-	}
+	r := routes.SetUpRouters()
 
-	err := http.ListenAndServe(":"+port, routes.Init())
+	err := r.Run()
 	if err != nil {
 		logger.Log(err)
 		log.Fatal(err)
