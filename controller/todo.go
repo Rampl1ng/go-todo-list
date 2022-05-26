@@ -47,7 +47,8 @@ func GetAllTodos(c *gin.Context) {
 	defer cancel()
 
 	filter := bson.M{}
-	findOptions := options.Find()
+	// sort all todos by title in ascending way
+	findOptions := options.Find().SetSort(bson.D{{"title", 1}})
 	cursor, err := mongoCollection.Find(ctx, filter, findOptions)
 	if err != nil {
 		fmt.Println(err)
