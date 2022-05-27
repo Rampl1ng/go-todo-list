@@ -105,7 +105,7 @@ func DeleteOneToDo(c *gin.Context) {
 }
 
 // Update changes the todo status to Completed
-func UpdateOneToDo(c *gin.Context) {
+func CompleteOneToDo(c *gin.Context) {
 	id := c.Param("id")
 	objId, err := convertObjectID(id)
 	if err != nil {
@@ -118,6 +118,31 @@ func UpdateOneToDo(c *gin.Context) {
 	// change complete status false to true
 	update := bson.M{
 		"$set": bson.M{"complete": true},
+	}
+	fmt.Println(update)
+
+	_, err = mongoCollection.UpdateOne(ctx, bson.M{"_id": objId}, update)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/v1/")
+}
+
+// Update changes the todo status to Not Completed
+func UndoOneToDo(c *gin.Context) {
+	id := c.Param("id")
+	objId, err := convertObjectID(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ctx, cancel := utils.TodoContext()
+	defer cancel()
+
+	// change complete status true to false
+	update := bson.M{
+		"$set": bson.M{"complete": false},
 	}
 	fmt.Println(update)
 

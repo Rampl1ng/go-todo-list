@@ -45,7 +45,9 @@
                                 <td><del>{{.Item}}</del></td>
                                 <td>Completed</td>
                                 <td>
-                                    <button class="btn btn-primary" disabled>Done</button>
+                                    <!-- <button class="btn btn-primary" disabled>Done</button> -->
+                                    <!-- TODO: need to disable browser cache -->
+                                    <a href="/v1/undo/{{ .Id}}"><button class="btn btn-primary">Undo</button></a>
                                     <a href="/v1/delete/{{ .Id}}"><button class="btn btn-danger" >Delete</button></a>
                                 </td>
                             </tr>
@@ -54,7 +56,7 @@
                                 <td>{{.Item}}</td>
                                 <td>Not Completed</td>
                                 <td>
-                                    <a href="/v1/update/{{ .Id}}"><button class="btn btn-primary">Done</button></a>
+                                    <a href="/v1/complete/{{ .Id}}"><button class="btn btn-primary">Done</button></a>
                                     <a href="/v1/delete/{{ .Id}}"><button class="btn btn-danger">Delete</button></a>
                                 </td>
                             </tr>

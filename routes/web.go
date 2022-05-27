@@ -14,7 +14,8 @@ func SetUpRouters() *gin.Engine {
 		v1.POST("/add", controller.AddOneToDo)
 		// TODO: why not use delete operation?
 		v1.GET("/delete/:id", controller.DeleteOneToDo)
-		v1.GET("/update/:id", controller.UpdateOneToDo)
+		v1.GET("/complete/:id", controller.CompleteOneToDo)
+		v1.GET("/undo/:id", controller.UndoOneToDo)
 	}
 
 	return router
