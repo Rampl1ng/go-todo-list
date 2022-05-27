@@ -6,7 +6,6 @@ A simple todolist application implenmented in Go
 
 ## Requirements
 
-- MySql
 - MongoDB
 
 ## Installation
